@@ -24,9 +24,11 @@ public class Movement : MonoBehaviour
     private Direction m_lastDirection = Direction.LEFT;
     private float m_dashCooldownTimeLeft = 0.0f;
     private float m_dashTimeRemaining = 0.0f;
+    private SpriteRenderer m_spriteRenderer;
 
     private void Awake()
     {
+        m_spriteRenderer = GetComponent<SpriteRenderer>();
         m_dashSlider = Slider.load(dashKey);
         m_rigidbody = GetComponent<Rigidbody2D>();
     }
@@ -35,6 +37,15 @@ public class Movement : MonoBehaviour
     {
         m_dashCooldownTimeLeft = Math.Max(m_dashCooldownTimeLeft - Time.deltaTime, 0f);
         m_dashTimeRemaining = Math.Max(m_dashTimeRemaining - Time.deltaTime, 0f);
+
+        if (m_dashCooldownTimeLeft <= 0)
+        {
+            m_spriteRenderer.color = Color.green;
+        }
+        else
+        {
+            m_spriteRenderer.color = Color.white;
+        }
 
         bool onGround = Physics2D.Raycast(
             new Vector2(transform.position.x, transform.position.y - transform.localScale.y / 2),
