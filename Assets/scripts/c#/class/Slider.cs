@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+[Obsolete("Unfinished")] 
 public class Slider
 {
     private GameObject m_background;
@@ -40,6 +43,19 @@ public class Slider
 
     void setProcentage(float newProcentage)
     {
+        if (m_procentage == newProcentage)
+            return;
+        
+        m_frontground.transform.localScale = new Vector2(
+            m_frontground.transform.localScale.x, 
+            m_frontground.transform.localScale.y * (newProcentage / m_procentage)
+        );
+
+        m_frontground.transform.position = new Vector2(
+            m_frontground.transform.position.x,
+            m_frontground.transform.position.y * (newProcentage / m_procentage) / 2
+        );
+        
         m_procentage = newProcentage;
     }
     
