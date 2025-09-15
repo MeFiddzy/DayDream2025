@@ -47,12 +47,16 @@ public class Movement : MonoBehaviour
             m_spriteRenderer.color = Color.white;
         }
 
-        bool onGround = Physics2D.Raycast(
-            new Vector2(transform.position.x, transform.position.y - transform.localScale.y / 2),
-            Vector2.down,
-            0.1f,
-            groundLayer
-        );
+        Func<float, RaycastHit2D> raycast4OnGround = (float errorX) => {
+            return Physics2D.Raycast(
+                new Vector2(transform.position.x + errorX, transform.position.y - transform.localScale.y / 2),
+                Vector2.down,
+                0.1f,
+                groundLayer
+            );
+        };
+        
+        bool onGround = raycast4OnGround(0) || raycast4OnGround(transform.localScale.x / 2) || raycast4OnGround(transform.localScale.x / -2);
         
         if (Input.GetKeyDown(KeyCode.UpArrow) && onGround)
         {
