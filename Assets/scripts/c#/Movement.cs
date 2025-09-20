@@ -94,7 +94,6 @@ public class Movement : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            print("kill");
             Kill();
         }
         
