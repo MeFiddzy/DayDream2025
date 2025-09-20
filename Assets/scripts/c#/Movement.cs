@@ -9,8 +9,6 @@ public class Movement : MonoBehaviour
         LEFT = -1,
         RIGHT = 1
     }
-
-    
     
     public float speed = 0.3f;
     public float dashPower = 1f;
@@ -19,8 +17,12 @@ public class Movement : MonoBehaviour
     public float dashCooldown = 4.5f;
     public float dashDuration = 0.2f;
     public uint wallJumps = 2;
-    public HashSet<KeyCode> dashKeys = new HashSet<KeyCode>{KeyCode.X, KeyCode.Q};
     public float ratioDashToAfterTime = 0.3f;
+    
+    public HashSet<KeyCode> dashKeys = new HashSet<KeyCode>{KeyCode.X, KeyCode.Q};
+    public HashSet<KeyCode> jumpKeys = new HashSet<KeyCode>{KeyCode.UpArrow, KeyCode.W, KeyCode.Space};
+    public HashSet<KeyCode> rightKeys = new HashSet<KeyCode>{KeyCode.RightArrow, KeyCode.D};
+    public HashSet<KeyCode> leftKeys = new HashSet<KeyCode>{KeyCode.LeftArrow, KeyCode.A};
 
     private Rigidbody2D m_rigidbody;
     private SpriteRenderer m_spriteRenderer;
@@ -66,7 +68,7 @@ public class Movement : MonoBehaviour
         PRESSING
     }
 
-    private bool willKey(HashSet<KeyCode> keys, StateType state)
+    private bool checkAllKeys(HashSet<KeyCode> keys, StateType state)
     {
         foreach (KeyCode key in keys)
         {
@@ -140,7 +142,7 @@ public class Movement : MonoBehaviour
             );
         };
         
-        bool onGround = raycast4OnGround(0) || raycast4OnGround(transform.localScale.x / 2 - 0.15f) || raycast4OnGround(transform.localScale.x / -2  + 0.15f);
+        bool onGround = raycast4OnGround(transform.localScale.x / 2 - 0.15f) || raycast4OnGround(transform.localScale.x / -2  + 0.15f);
         bool canDash = m_dashCooldownTimeLeft <= 0f;
 
         if (onGround)
@@ -150,7 +152,7 @@ public class Movement : MonoBehaviour
             m_airJumpedThisAirtime = false;
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (checkAllKeys(jumpKeys, StateType.DOWN))
         {
             if (onGround)
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 2);
@@ -185,7 +187,7 @@ public class Movement : MonoBehaviour
                 m_airJumpedThisAirtime = true;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.5f);
 
-                if (willKey(dashKeys, StateType.PRESSING) && m_dashedNow)
+                if (checkAllKeys(dashKeys, StateType.PRESSING) && m_dashedNow)
                 {
                     canDash = false;
 
@@ -216,7 +218,7 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        if (willKey(dashKeys, StateType.PRESSING) && canDash)
+        if (checkAllKeys(dashKeys, StateType.PRESSING) && canDash)
         {
             m_dashedNow = true;
             
@@ -225,12 +227,12 @@ public class Movement : MonoBehaviour
         }
 
         float horizontalInput = 0f;
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (checkAllKeys(leftKeys, StateType.PRESSING))
         {
             m_lastDirection = Direction.LEFT;
             horizontalInput = onGround ? -1f : -0.7f;
         }
-        else if (Input.GetKey(KeyCode.RightArrow))
+        else if (checkAllKeys(rightKeys, StateType.PRESSING))
         {
             m_lastDirection = Direction.RIGHT;
             horizontalInput = onGround ? 1f : 0.7f;
