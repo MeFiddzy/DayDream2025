@@ -9,6 +9,8 @@ public class Movement : MonoBehaviour
         LEFT = -1,
         RIGHT = 1
     }
+
+    
     
     public float speed = 0.3f;
     public float dashPower = 1f;
@@ -23,6 +25,7 @@ public class Movement : MonoBehaviour
     private Rigidbody2D m_rigidbody;
     private SpriteRenderer m_spriteRenderer;
     private Transform m_cameraTransform;
+    private Transform m_respawn;
     
     private Direction m_lastDirection = Direction.LEFT;
     private Direction m_lastWallJumpDirection;
@@ -35,9 +38,14 @@ public class Movement : MonoBehaviour
     private float m_dashTimeRemaining = 0.0f;
     private float m_wallJumpAfterTime = 0.0f;
     
-
+    public void Kill()
+    {
+        transform.position = new Vector2(m_respawn.position.x, m_respawn.position.y);
+    }
+    
     private void Awake()
     {
+        m_respawn = GameObject.Find("Respawn").GetComponent<Transform>();
         m_spriteRenderer = GetComponent<SpriteRenderer>();
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_cameraTransform = Camera.main.transform;
@@ -73,6 +81,12 @@ public class Movement : MonoBehaviour
     
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            print("kill");
+            Kill();
+        }
+        
         m_cameraTransform.position = new Vector2(
             transform.position.x,
             m_cameraTransform.position.y
@@ -90,16 +104,34 @@ public class Movement : MonoBehaviour
             m_spriteRenderer.color = Color.white;
         }
 
-        Func<float, RaycastHit2D> raycast4OnGround = (float errorX) => {
+        Debug.DrawRay(
+            new Vector2(transform.position.x + transform.localScale.x / 2, transform.position.y),
+            Vector2.right,
+            Color.red
+        );
+        
+        Debug.DrawRay(
+            new Vector2(transform.position.x - transform.localScale.x / 2, transform.position.y),
+            Vector2.left,
+            Color.red
+        );
+        
+        Func<float, RaycastHit2D> raycast4OnGround = errorX => {
+            Debug.DrawRay(
+                new Vector2(transform.position.x + errorX, transform.position.y - transform.localScale.y / 2),
+                Vector2.down,
+                Color.red
+            );
+            
             return Physics2D.Raycast(
                 new Vector2(transform.position.x + errorX, transform.position.y - transform.localScale.y / 2),
                 Vector2.down,
-                0.1f,
+                0.2373794f,
                 groundLayer
             );
         };
         
-        bool onGround = raycast4OnGround(0) || raycast4OnGround(transform.localScale.x / 2) || raycast4OnGround(transform.localScale.x / -2);
+        bool onGround = raycast4OnGround(0) || raycast4OnGround(transform.localScale.x / 2 - 0.15f) || raycast4OnGround(transform.localScale.x / -2  + 0.15f);
         bool canDash = m_dashCooldownTimeLeft <= 0f;
 
         if (onGround)
@@ -118,7 +150,7 @@ public class Movement : MonoBehaviour
                 m_airJumpedThis = true;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.5f);
 
-                if (willKey(dashKeys, StateType.PRESSING) && m_dashedNow == true)
+                if (willKey(dashKeys, StateType.PRESSING) && m_dashedNow)
                 {
                     canDash = false;
                     
@@ -132,7 +164,7 @@ public class Movement : MonoBehaviour
             else if (Physics2D.Raycast(
                          new Vector2(transform.position.x + transform.localScale.x / 2, transform.position.y),
                          Vector2.right,
-                         0.1f,
+                         0.2373794f,
                          groundLayer
                      ) && m_wallJumpsUsed + 1 < wallJumps)
             {
@@ -145,7 +177,7 @@ public class Movement : MonoBehaviour
             else if (Physics2D.Raycast(
                           new Vector2(transform.position.x - transform.localScale.x / 2, transform.position.y),
                           Vector2.left,
-                          0.1f,
+                          0.2373794f,
                           groundLayer
                       )&& m_wallJumpsUsed + 1 < wallJumps)
             {
@@ -197,5 +229,6 @@ public class Movement : MonoBehaviour
         }
         
         m_rigidbody.velocity = new Vector2(horizontalInput * speed * 15f, m_rigidbody.velocity.y);
+        
     }
 }
