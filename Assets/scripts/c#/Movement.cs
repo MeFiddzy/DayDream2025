@@ -159,7 +159,7 @@ public class Movement : MonoBehaviour
                          Vector2.right,
                          0.2373794f,
                          groundLayer
-                     ) && m_wallJumpsUsed + 1 < wallJumps)
+                     ) && m_wallJumpsUsed < wallJumps)
             {
                 m_lastWallJumpDirection = Direction.LEFT;
                 m_wallJumpAfterTime = dashDuration;
@@ -172,7 +172,7 @@ public class Movement : MonoBehaviour
                          Vector2.left,
                          0.2373794f,
                          groundLayer
-                     )&& m_wallJumpsUsed + 1 < wallJumps)
+                     )&& m_wallJumpsUsed < wallJumps)
             {
                 m_lastWallJumpDirection = Direction.RIGHT;   
                 m_wallJumpAfterTime = dashDuration;
@@ -198,8 +198,7 @@ public class Movement : MonoBehaviour
         }
             
 
-        Action<float> dashLogic = x =>
-        {
+        Action<float> dashLogic = x => {
             m_rigidbody.velocity = new Vector2(x, m_rigidbody.velocity.y);
         };
 
