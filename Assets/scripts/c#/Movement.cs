@@ -33,7 +33,7 @@ public class Movement : MonoBehaviour
 
     private uint m_wallJumpsUsed = 0;
     private bool m_dashedNow = false;
-    private bool m_airJumpedThis = false;
+    private bool m_airJumpedThisAirtime = false;
     private float m_dashCooldownTimeLeft = 0.0f;
     private float m_dashTimeRemaining = 0.0f;
     private float m_wallJumpAfterTime = 0.0f;
@@ -41,6 +41,15 @@ public class Movement : MonoBehaviour
     public void Kill()
     {
         transform.position = new Vector2(m_respawn.position.x, m_respawn.position.y);
+        
+        m_dashedNow = false;
+        m_dashTimeRemaining = 0.0f;
+        m_dashCooldownTimeLeft = 0.0f;
+
+        m_wallJumpsUsed = 0;
+        m_wallJumpAfterTime = 0.0f;
+        
+        m_airJumpedThisAirtime = false;
     }
     
     private void Awake()
@@ -138,29 +147,13 @@ public class Movement : MonoBehaviour
         {
             m_dashedNow = false;
             m_wallJumpsUsed = 0;
-            m_airJumpedThis = false;
+            m_airJumpedThisAirtime = false;
         }
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             if (onGround)
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 2);
-            else if (!m_airJumpedThis)
-            {
-                m_airJumpedThis = true;
-                m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.5f);
-
-                if (willKey(dashKeys, StateType.PRESSING) && m_dashedNow)
-                {
-                    canDash = false;
-                    
-                    m_dashedNow = false;
-                    
-                    m_dashTimeRemaining = dashDuration;
-                    m_dashCooldownTimeLeft = dashCooldown;
-                    
-                }
-            }
             else if (Physics2D.Raycast(
                          new Vector2(transform.position.x + transform.localScale.x / 2, transform.position.y),
                          Vector2.right,
@@ -175,11 +168,11 @@ public class Movement : MonoBehaviour
                 return;
             }
             else if (Physics2D.Raycast(
-                          new Vector2(transform.position.x - transform.localScale.x / 2, transform.position.y),
-                          Vector2.left,
-                          0.2373794f,
-                          groundLayer
-                      )&& m_wallJumpsUsed + 1 < wallJumps)
+                         new Vector2(transform.position.x - transform.localScale.x / 2, transform.position.y),
+                         Vector2.left,
+                         0.2373794f,
+                         groundLayer
+                     )&& m_wallJumpsUsed + 1 < wallJumps)
             {
                 m_lastWallJumpDirection = Direction.RIGHT;   
                 m_wallJumpAfterTime = dashDuration;
@@ -187,7 +180,23 @@ public class Movement : MonoBehaviour
                 m_wallJumpsUsed++;
                 return;
             }
+            else if (!m_airJumpedThisAirtime)
+            {
+                m_airJumpedThisAirtime = true;
+                m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.5f);
+
+                if (willKey(dashKeys, StateType.PRESSING) && m_dashedNow)
+                {
+                    canDash = false;
+
+                    m_dashedNow = false;
+                    m_dashTimeRemaining = dashDuration;
+                    m_dashCooldownTimeLeft = dashCooldown;
+
+                }
+            }
         }
+            
 
         Action<float> dashLogic = x =>
         {
