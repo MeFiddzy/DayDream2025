@@ -23,6 +23,8 @@ public class Movement : MonoBehaviour
     public HashSet<KeyCode> jumpKeys = new HashSet<KeyCode>{KeyCode.UpArrow, KeyCode.W, KeyCode.Space};
     public HashSet<KeyCode> rightKeys = new HashSet<KeyCode>{KeyCode.RightArrow, KeyCode.D};
     public HashSet<KeyCode> leftKeys = new HashSet<KeyCode>{KeyCode.LeftArrow, KeyCode.A};
+    public HashSet<KeyCode> reloadINIKeys = new HashSet<KeyCode>{KeyCode.Delete};
+    public HashSet<KeyCode> resetKeys = new HashSet<KeyCode>{KeyCode.R};
 
     private Rigidbody2D m_rigidbody;
     
@@ -93,10 +95,26 @@ public class Movement : MonoBehaviour
         }
         return false;
     }
-    
-    private void Update()
+
+    private HashSet<KeyCode> INIArrayToKeys(string[] arr)
     {
-        if (Input.GetKeyDown(KeyCode.Delete))
+        HashSet<KeyCode> keys = new HashSet<KeyCode>();
+
+        foreach (string key in arr)
+        {
+            if (Enum.TryParse(key, true, out KeyCode keyCode))
+            {
+                keys.Add(keyCode);
+            }
+        }
+
+        return keys;
+    }
+
+    
+    public void Update()
+    {
+        if (checkAllKeys(reloadINIKeys, StateType.DOWN))
         {
             INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");
             
@@ -111,13 +129,21 @@ public class Movement : MonoBehaviour
             dashDuration = (float)Convert.ToDouble(configFile["dash"]["dash_duration"]);
             
             print("Reset Stats");
-            print(configFile["_"]["speed"]);
+            
+            INIFile keystrokes = INIFile.loadFile(Application.dataPath + "/config/keystrokes.ini");
+            
+            dashKeys = INIArrayToKeys(keystrokes.loadArray("dash_keys"));
+            jumpKeys = INIArrayToKeys(keystrokes.loadArray("jump_keys"));
+            leftKeys = INIArrayToKeys(keystrokes.loadArray("left_keys"));
+            rightKeys = INIArrayToKeys(keystrokes.loadArray("right_keys"));
+            reloadINIKeys = INIArrayToKeys(keystrokes.loadArray("reload_ini_keys"));
+            resetKeys = INIArrayToKeys(keystrokes.loadArray("reset_keys"));
         }
         
         // Dash slider follow
         m_dashEmptyTransform.position = transform.position;
         
-        if (Input.GetKeyDown(KeyCode.R))
+        if (checkAllKeys(resetKeys, StateType.DOWN))
         {
             kill();
         }
