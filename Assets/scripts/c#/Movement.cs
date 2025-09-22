@@ -25,9 +25,11 @@ public class Movement : MonoBehaviour
     public HashSet<KeyCode> leftKeys = new HashSet<KeyCode>{KeyCode.LeftArrow, KeyCode.A};
 
     private Rigidbody2D m_rigidbody;
-    private SpriteRenderer m_spriteRenderer;
+    
+    private Transform m_dashBGTransform;
     private Transform m_cameraTransform;
-    private Transform m_respawn;
+    private Transform m_respawnTransform;
+    private Transform m_dashEmptyTransform;
     
     private Direction m_lastDirection = Direction.LEFT;
     private Direction m_lastWallJumpDirection;
@@ -42,7 +44,7 @@ public class Movement : MonoBehaviour
     
     public void Kill()
     {
-        transform.position = new Vector2(m_respawn.position.x, m_respawn.position.y);
+        transform.position = new Vector2(m_respawnTransform.position.x, m_respawnTransform.position.y);
         
         m_dashedNow = false;
         m_dashTimeRemaining = 0.0f;
@@ -56,10 +58,12 @@ public class Movement : MonoBehaviour
     
     private void Awake()
     {
-        m_respawn = GameObject.Find("Respawn").GetComponent<Transform>();
-        m_spriteRenderer = GetComponent<SpriteRenderer>();
-        m_rigidbody = GetComponent<Rigidbody2D>();
+        m_dashBGTransform = GameObject.Find("Dash Slider Background").GetComponent<Transform>();
+        m_dashEmptyTransform = GameObject.Find("Dash Slider").GetComponent<Transform>();
+        m_respawnTransform = GameObject.Find("Respawn").GetComponent<Transform>();
         m_cameraTransform = Camera.main.transform;
+        
+        m_rigidbody = GetComponent<Rigidbody2D>();
     }
 
     private enum StateType
@@ -92,28 +96,31 @@ public class Movement : MonoBehaviour
     
     private void Update()
     {
+        // Dash slider follow
+        m_dashEmptyTransform.position = transform.position;
+        
         if (Input.GetKeyDown(KeyCode.R))
         {
             Kill();
         }
         
+        // Camera follow
         m_cameraTransform.position = new Vector2(
             transform.position.x,
             m_cameraTransform.position.y
         );
         
+        // Dash time logic
         m_dashCooldownTimeLeft = Math.Max(m_dashCooldownTimeLeft - Time.deltaTime, 0f);
         m_dashTimeRemaining = Math.Max(m_dashTimeRemaining - Time.deltaTime, 0f);
 
-        if (m_dashCooldownTimeLeft <= 0)
-        {
-            m_spriteRenderer.color = Color.green;
-        }
-        else
-        {
-            m_spriteRenderer.color = Color.white;
-        }
+        // Dash slider logic
+        m_dashBGTransform.localScale = new Vector2(
+            4 * ((dashCooldown - Math.Min(m_dashCooldownTimeLeft, dashCooldown)) / dashCooldown),
+            m_dashBGTransform.localScale.y
+        );
 
+        // Debug Rays
         Debug.DrawRay(
             new Vector2(transform.position.x + transform.localScale.x / 2, transform.position.y),
             Vector2.right,
@@ -126,6 +133,7 @@ public class Movement : MonoBehaviour
             Color.red
         );
         
+        // Jumping logic
         Func<float, RaycastHit2D> raycast4OnGround = errorX => {
             Debug.DrawRay(
                 new Vector2(transform.position.x + errorX, transform.position.y - transform.localScale.y / 2),
@@ -155,6 +163,7 @@ public class Movement : MonoBehaviour
         {
             if (onGround)
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 2);
+            // Walljumping
             else if (Physics2D.Raycast(
                          new Vector2(transform.position.x + transform.localScale.x / 2, transform.position.y),
                          Vector2.right,
@@ -181,6 +190,7 @@ public class Movement : MonoBehaviour
                 m_wallJumpsUsed++;
                 return;
             }
+            // airjumping
             else if (!m_airJumpedThisAirtime)
             {
                 m_airJumpedThisAirtime = true;
@@ -199,6 +209,7 @@ public class Movement : MonoBehaviour
         }
             
 
+        // Dashing
         Action<float> dashLogic = x => {
             m_rigidbody.velocity = new Vector2(x, m_rigidbody.velocity.y);
         };
@@ -217,7 +228,7 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        if (checkAllKeys(dashKeys, StateType.PRESSING) && canDash)
+        if (checkAllKeys(dashKeys, StateType.DOWN) && canDash)
         {
             m_dashedNow = true;
             
@@ -225,16 +236,17 @@ public class Movement : MonoBehaviour
             m_dashCooldownTimeLeft = dashCooldown;
         }
 
+        // left & right
         float horizontalInput = 0f;
         if (checkAllKeys(leftKeys, StateType.PRESSING))
         {
             m_lastDirection = Direction.LEFT;
-            horizontalInput = onGround ? -1f : -0.7f;
+            horizontalInput = onGround ? -1f : -0.9f;
         }
         else if (checkAllKeys(rightKeys, StateType.PRESSING))
         {
             m_lastDirection = Direction.RIGHT;
-            horizontalInput = onGround ? 1f : 0.7f;
+            horizontalInput = onGround ? 1f : 0.9f;
         }
         
         m_rigidbody.velocity = new Vector2(horizontalInput * speed * 15f, m_rigidbody.velocity.y);

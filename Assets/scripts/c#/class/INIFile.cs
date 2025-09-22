@@ -27,7 +27,7 @@ public class INIFile
             }
 
             string value, key;
-            string []splitRes = line.Split('=');
+            string[] splitRes = line.Split('=');
 
             key = splitRes[0];
             value = splitRes[1];
@@ -41,7 +41,7 @@ public class INIFile
         return output;
     }
     
-    private Dictionary<string, Dictionary<string, object>> m_objData = 
+    private readonly Dictionary<string, Dictionary<string, object>> m_objData = 
         new Dictionary<string, Dictionary<string, object>>();
     
     public Dictionary<string, object> this[string key]
