@@ -8,7 +8,7 @@ public class KillBoxScript : MonoBehaviour
         Movement movement = other.gameObject.GetComponent<Movement>();
         if (movement != null)
         {
-            movement.Kill();
+            movement.kill();
         }
     }
 }

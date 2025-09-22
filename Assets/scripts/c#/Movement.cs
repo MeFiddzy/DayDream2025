@@ -42,7 +42,7 @@ public class Movement : MonoBehaviour
     private float m_dashTimeRemaining = 0.0f;
     private float m_wallJumpAfterTime = 0.0f;
     
-    public void Kill()
+    public void kill()
     {
         transform.position = new Vector2(m_respawnTransform.position.x, m_respawnTransform.position.y);
         
@@ -101,7 +101,7 @@ public class Movement : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.R))
         {
-            Kill();
+            this.kill();
         }
         
         // Camera follow
