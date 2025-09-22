@@ -8,7 +8,7 @@ public class INIFile
     {
         INIFile output = new INIFile();
 
-        string curHeder = "";
+        string curHeader = "";
 
         foreach (string line in File.ReadLines(filePath))
         {
@@ -17,11 +17,11 @@ public class INIFile
             
             if (line.StartsWith("[") && line.EndsWith("]"))
             {
-                curHeder = line.Substring(1, line.Length - 2);
+                curHeader = line.Substring(1, line.Length - 2);
                 continue;
             }
 
-            if (curHeder == "")
+            if (curHeader == "")
             {
                 throw new Exception("A heder is not provided!");
             }
@@ -32,19 +32,19 @@ public class INIFile
             key = splitRes[0];
             value = splitRes[1];
 
-            if (!output.m_objData.ContainsKey(curHeder))
-                output.m_objData[curHeder] = new Dictionary<string, object>();
+            if (!output.m_objData.ContainsKey(curHeader))
+                output.m_objData[curHeader] = new Dictionary<string, string>();
             
-            output.m_objData[curHeder][key] = value;
+            output.m_objData[curHeader][key] = value;
         }
         
         return output;
     }
     
-    private readonly Dictionary<string, Dictionary<string, object>> m_objData = 
-        new Dictionary<string, Dictionary<string, object>>();
+    private readonly Dictionary<string, Dictionary<string, string>> m_objData = 
+        new Dictionary<string, Dictionary<string, string>>();
     
-    public Dictionary<string, object> this[string key]
+    public Dictionary<string, string> this[string key]
     {
         get
         {

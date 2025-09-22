@@ -96,12 +96,30 @@ public class Movement : MonoBehaviour
     
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");
+            
+            speed = (float)Convert.ToDouble(configFile["_"]["speed"]);
+            
+            jumpPower = (float)Convert.ToDouble(configFile["jump"]["jump_power"]);
+            wallJumps = Convert.ToUInt32(configFile["jump"]["wall_jumps"]);
+            ratioDashToAfterTime = (float)Convert.ToDouble(configFile["jump"]["ratio_dash_to_wall_jump_after"]);
+            
+            dashPower = (float)Convert.ToDouble(configFile["dash"]["dash_power"]);
+            dashCooldown = (float)Convert.ToDouble(configFile["dash"]["dash_cooldown"]);
+            dashDuration = (float)Convert.ToDouble(configFile["dash"]["dash_duration"]);
+            
+            print("Reset Stats");
+            print(configFile["_"]["speed"]);
+        }
+        
         // Dash slider follow
         m_dashEmptyTransform.position = transform.position;
         
         if (Input.GetKeyDown(KeyCode.R))
         {
-            this.kill();
+            kill();
         }
         
         // Camera follow
