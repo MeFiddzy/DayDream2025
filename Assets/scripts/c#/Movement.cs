@@ -11,6 +11,7 @@ public class Movement : MonoBehaviour
     }
     
     public float speed = 0.3f;
+    public float coyoteTime = 0.1f;
     public float dashPower = 1f;
     public float jumpPower = 5f;
     public LayerMask groundLayer;
@@ -43,6 +44,7 @@ public class Movement : MonoBehaviour
     private float m_dashCooldownTimeLeft = 0.0f;
     private float m_dashTimeRemaining = 0.0f;
     private float m_wallJumpAfterTime = 0.0f;
+    private float m_coyoteTime = 0.0f;
     
     public void kill()
     {
@@ -119,6 +121,9 @@ public class Movement : MonoBehaviour
     
     public void Update()
     {
+        // coyote time decrease
+        m_coyoteTime = Math.Max(m_coyoteTime - Time.deltaTime, 0);
+        
         if (checkAllKeys(reloadINIKeys, StateType.DOWN))
         {
             reloadConfig();
@@ -176,12 +181,18 @@ public class Movement : MonoBehaviour
                 groundLayer
             );
         };
-        
-        bool onGround = raycast4OnGround(transform.localScale.x / 2 - 0.15f) || raycast4OnGround(transform.localScale.x / -2  + 0.15f);
-        bool canDash = m_dashCooldownTimeLeft <= 0f;
 
+        // boolean init
+        bool onGround = raycast4OnGround(transform.localScale.x / 2 - 0.15f) ||
+                        raycast4OnGround(transform.localScale.x / -2 + 0.15f);
+        
+        bool canJump = onGround || m_coyoteTime > 0f;
+        
+        bool canDash = m_dashCooldownTimeLeft <= 0f;
+        
         if (onGround)
         {
+            m_coyoteTime = coyoteTime;
             m_dashedNow = false;
             m_wallJumpsUsed = 0;
             m_airJumpedThisAirtime = false;
@@ -189,7 +200,7 @@ public class Movement : MonoBehaviour
 
         if (checkAllKeys(jumpKeys, StateType.DOWN))
         {
-            if (onGround)
+            if (canJump)
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 2);
             // Walljumping
             else if (Physics2D.Raycast(
@@ -269,12 +280,12 @@ public class Movement : MonoBehaviour
         if (checkAllKeys(leftKeys, StateType.PRESSING))
         {
             m_lastDirection = Direction.LEFT;
-            horizontalInput = onGround ? -1f : -0.9f;
+            horizontalInput = canJump ? -1f : -0.9f;
         }
         else if (checkAllKeys(rightKeys, StateType.PRESSING))
         {
             m_lastDirection = Direction.RIGHT;
-            horizontalInput = onGround ? 1f : 0.9f;
+            horizontalInput = canJump ? 1f : 0.9f;
         }
         
         m_rigidbody.velocity = new Vector2(horizontalInput * speed * 15f, m_rigidbody.velocity.y);
@@ -285,6 +296,7 @@ public class Movement : MonoBehaviour
         INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");
             
         speed = (float)Convert.ToDouble(configFile["_"]["speed"]);
+        coyoteTime = (float)Convert.ToDouble(configFile["_"]["coyote_time"]);
             
         jumpPower = (float)Convert.ToDouble(configFile["jump"]["jump_power"]);
         wallJumps = Convert.ToUInt32(configFile["jump"]["wall_jumps"]);
