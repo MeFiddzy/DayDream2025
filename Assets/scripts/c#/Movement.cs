@@ -58,7 +58,7 @@ public class Movement : MonoBehaviour
         m_airJumpedThisAirtime = false;
     }
     
-    private void Awake()
+    public void Awake()
     {
         m_dashBGTransform = GameObject.Find("Dash Slider Background").GetComponent<Transform>();
         m_dashEmptyTransform = GameObject.Find("Dash Slider").GetComponent<Transform>();
@@ -66,6 +66,11 @@ public class Movement : MonoBehaviour
         m_cameraTransform = Camera.main.transform;
         
         m_rigidbody = GetComponent<Rigidbody2D>();
+    }
+
+    public void Start()
+    {
+        reloadConfig();
     }
 
     private enum StateType
@@ -116,28 +121,7 @@ public class Movement : MonoBehaviour
     {
         if (checkAllKeys(reloadINIKeys, StateType.DOWN))
         {
-            INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");
-            
-            speed = (float)Convert.ToDouble(configFile["_"]["speed"]);
-            
-            jumpPower = (float)Convert.ToDouble(configFile["jump"]["jump_power"]);
-            wallJumps = Convert.ToUInt32(configFile["jump"]["wall_jumps"]);
-            ratioDashToAfterTime = (float)Convert.ToDouble(configFile["jump"]["ratio_dash_to_wall_jump_after"]);
-            
-            dashPower = (float)Convert.ToDouble(configFile["dash"]["dash_power"]);
-            dashCooldown = (float)Convert.ToDouble(configFile["dash"]["dash_cooldown"]);
-            dashDuration = (float)Convert.ToDouble(configFile["dash"]["dash_duration"]);
-            
-            print("Reset Stats");
-            
-            INIFile keystrokes = INIFile.loadFile(Application.dataPath + "/config/keystrokes.ini");
-            
-            dashKeys = INIArrayToKeys(keystrokes.loadArray("dash_keys"));
-            jumpKeys = INIArrayToKeys(keystrokes.loadArray("jump_keys"));
-            leftKeys = INIArrayToKeys(keystrokes.loadArray("left_keys"));
-            rightKeys = INIArrayToKeys(keystrokes.loadArray("right_keys"));
-            reloadINIKeys = INIArrayToKeys(keystrokes.loadArray("reload_ini_keys"));
-            resetKeys = INIArrayToKeys(keystrokes.loadArray("reset_keys"));
+            reloadConfig();
         }
         
         // Dash slider follow
@@ -294,6 +278,31 @@ public class Movement : MonoBehaviour
         }
         
         m_rigidbody.velocity = new Vector2(horizontalInput * speed * 15f, m_rigidbody.velocity.y);
-        
+    }
+    
+    private void reloadConfig()
+    {
+        INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");
+            
+        speed = (float)Convert.ToDouble(configFile["_"]["speed"]);
+            
+        jumpPower = (float)Convert.ToDouble(configFile["jump"]["jump_power"]);
+        wallJumps = Convert.ToUInt32(configFile["jump"]["wall_jumps"]);
+        ratioDashToAfterTime = (float)Convert.ToDouble(configFile["jump"]["ratio_dash_to_wall_jump_after"]);
+            
+        dashPower = (float)Convert.ToDouble(configFile["dash"]["dash_power"]);
+        dashCooldown = (float)Convert.ToDouble(configFile["dash"]["dash_cooldown"]);
+        dashDuration = (float)Convert.ToDouble(configFile["dash"]["dash_duration"]);
+            
+        print("Reset Stats");
+            
+        INIFile keystrokes = INIFile.loadFile(Application.dataPath + "/config/keystrokes.ini");
+            
+        dashKeys = INIArrayToKeys(keystrokes.loadArray("dash_keys"));
+        jumpKeys = INIArrayToKeys(keystrokes.loadArray("jump_keys"));
+        leftKeys = INIArrayToKeys(keystrokes.loadArray("left_keys"));
+        rightKeys = INIArrayToKeys(keystrokes.loadArray("right_keys"));
+        reloadINIKeys = INIArrayToKeys(keystrokes.loadArray("reload_ini_keys"));
+        resetKeys = INIArrayToKeys(keystrokes.loadArray("reset_keys"));
     }
 }
