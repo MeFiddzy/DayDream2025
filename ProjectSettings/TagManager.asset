@@ -41,3 +41,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Slider BG
+    uniqueID: 357361791
+    locked: 0
+  - name: Slider Border
+    uniqueID: 2716037747
+    locked: 0
+  - name: Slider WBG
+    uniqueID: 736014239
+    locked: 0

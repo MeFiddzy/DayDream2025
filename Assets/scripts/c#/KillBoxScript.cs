@@ -5,10 +5,10 @@ public class KillBoxScript : MonoBehaviour
 {
     public void OnTriggerEnter2D(Collider2D other)
     {
-        Movement movement = other.gameObject.GetComponent<Movement>();
-        if (movement != null)
+        MovementManager movementManager = other.gameObject.GetComponent<MovementManager>();
+        if (movementManager != null)
         {
-            movement.kill();
+            movementManager.kill();
         }
     }
 }
