@@ -28,11 +28,11 @@ public class Movement : MonoBehaviour
     public HashSet<KeyCode> resetKeys = new HashSet<KeyCode>{KeyCode.R};
 
     private Rigidbody2D m_rigidbody;
-    
     private Transform m_dashBGTransform;
     private Transform m_cameraTransform;
     private Transform m_respawnTransform;
     private Transform m_followPlayer;
+    private Transform m_voidKillTransform;
     
     private Direction m_lastDirection = Direction.LEFT;
     private Direction m_lastWallJumpDirection;
@@ -62,6 +62,7 @@ public class Movement : MonoBehaviour
     
     public void Awake()
     {
+        m_voidKillTransform = GameObject.Find("KillVoid").GetComponent<Transform>();
         m_dashBGTransform = GameObject.Find("DashSlider").GetComponent<Transform>();
         m_followPlayer = GameObject.Find("FollowPlayer").GetComponent<Transform>();
         m_respawnTransform = GameObject.Find("Respawn").GetComponent<Transform>();
@@ -289,6 +290,10 @@ public class Movement : MonoBehaviour
         }
         
         m_rigidbody.velocity = new Vector2(horizontalInput * speed * 15f, m_rigidbody.velocity.y);
+        m_voidKillTransform.position = new Vector2(
+            transform.position.x,
+            m_voidKillTransform.position.y
+        );
     }
     
     private void reloadConfig()
