@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class InventoryManager : MonoBehaviour
         m_playerTransform = GameObject.Find("Player").GetComponent<Transform>();
     }
 
-    public const int inventorySlotsCount = 10;
+    public int inventorySlotsCount = 10;
     public int getItemCount()
     {
         return m_items.Count;
@@ -43,7 +44,7 @@ public class InventoryManager : MonoBehaviour
             throw new IndexOutOfRangeException();
         
         m_items.Add(item);
-        item.onCollect(m_playerTransform.position);
+        item.onCollect(m_playerTransform.position, GameObject.Find("Player"));
     }
 
     public bool dropItem(int index)
@@ -51,7 +52,9 @@ public class InventoryManager : MonoBehaviour
         if (index > getItemCount())
             return false;
         
-        m_items[index].onDrop(m_playerTransform.position);
+        m_items.RemoveAt(index);
+        
+        m_items[index].onDrop(m_playerTransform.position, GameObject.Find("Player"));
         return true;
     }
     
@@ -63,7 +66,7 @@ public class InventoryManager : MonoBehaviour
         if (m_items[index] is ArmourItem armour)
             equipArmour(armour);
         
-        return m_items[index].onUse(m_playerTransform.position);
+        return m_items[index].onUse(m_playerTransform.position, GameObject.Find("Player"));
     }
 
     private void equipArmour(ArmourItem armour)

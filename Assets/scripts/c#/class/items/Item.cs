@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public abstract class Item
+public abstract class Item : MonoBehaviour
 {
     public enum UseResult
     {
@@ -10,11 +10,14 @@ public abstract class Item
     
     private Texture2D m_itemTexture;
 
-    public abstract UseResult onUse(Vector2 pos);
+    public UseResult onUse(Vector2 pos, GameObject player)
+    {
+        return UseResult.SUCCESS;
+    }
     
-    public abstract void onCollect(Vector2 pos);
+    public void onCollect(Vector2 pos, GameObject player) {}
     
-    public abstract void onDrop(Vector2 pos);
+    public void onDrop(Vector2 pos, GameObject player) {}
 
     public Texture2D getTexture()
     {

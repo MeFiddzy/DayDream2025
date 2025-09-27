@@ -1,7 +1,9 @@
-﻿namespace c_.class.util
+﻿using System.Collections.Generic;
+
+public static class UItems
 {
-    public class UItems
+    public static Item getItemById(int id)
     {
-        
+        return null;
     }
 }

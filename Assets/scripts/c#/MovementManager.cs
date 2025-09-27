@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class MovementManager : MonoBehaviour
 {
-    private enum Direction
+    public enum Direction
     {
         LEFT = -1,
         RIGHT = 1
@@ -58,6 +58,11 @@ public class Movement : MonoBehaviour
         m_wallJumpAfterTime = 0.0f;
         
         m_airJumpedThisAirtime = false;
+    }
+
+    public Direction getLastDirection()
+    {
+        return m_lastDirection;
     }
     
     public void Awake()
