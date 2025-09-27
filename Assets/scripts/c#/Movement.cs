@@ -32,7 +32,7 @@ public class Movement : MonoBehaviour
     private Transform m_dashBGTransform;
     private Transform m_cameraTransform;
     private Transform m_respawnTransform;
-    private Transform m_dashEmptyTransform;
+    private Transform m_followPlayer;
     
     private Direction m_lastDirection = Direction.LEFT;
     private Direction m_lastWallJumpDirection;
@@ -62,8 +62,8 @@ public class Movement : MonoBehaviour
     
     public void Awake()
     {
-        m_dashBGTransform = GameObject.Find("Dash Slider Background").GetComponent<Transform>();
-        m_dashEmptyTransform = GameObject.Find("Dash Slider").GetComponent<Transform>();
+        m_dashBGTransform = GameObject.Find("DashSlider").GetComponent<Transform>();
+        m_followPlayer = GameObject.Find("FollowPlayer").GetComponent<Transform>();
         m_respawnTransform = GameObject.Find("Respawn").GetComponent<Transform>();
         m_cameraTransform = Camera.main.transform;
         
@@ -130,7 +130,7 @@ public class Movement : MonoBehaviour
         }
         
         // Dash slider follow
-        m_dashEmptyTransform.position = transform.position;
+        m_followPlayer.position = transform.position;
         
         if (checkAllKeys(resetKeys, StateType.DOWN))
         {
@@ -149,7 +149,7 @@ public class Movement : MonoBehaviour
 
         // Dash slider logic
         m_dashBGTransform.localScale = new Vector2(
-            4 * ((dashCooldown - Math.Min(m_dashCooldownTimeLeft, dashCooldown)) / dashCooldown),
+            0.8359f * ((dashCooldown - Math.Min(m_dashCooldownTimeLeft, dashCooldown)) / dashCooldown),
             m_dashBGTransform.localScale.y
         );
 
