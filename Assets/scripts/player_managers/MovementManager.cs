@@ -28,6 +28,7 @@ public class MovementManager : MonoBehaviour
     public HashSet<KeyCode> resetKeys = new HashSet<KeyCode>{KeyCode.R};
 
     private Rigidbody2D m_rigidbody;
+    private Animator m_animator;
     private Transform m_dashBGTransform;
     private Transform m_cameraTransform;
     private Transform m_respawnTransform;
@@ -37,9 +38,7 @@ public class MovementManager : MonoBehaviour
     private Direction m_lastDirection = Direction.LEFT;
     private Direction m_lastWallJumpDirection;
     
-
     private uint m_wallJumpsUsed = 0;
-    private bool m_dashedNow = false;
     private bool m_airJumpedThisAirtime = false;
     private float m_dashCooldownTimeLeft = 0.0f;
     private float m_dashTimeRemaining = 0.0f;
@@ -50,7 +49,6 @@ public class MovementManager : MonoBehaviour
     {
         transform.position = new Vector2(m_respawnTransform.position.x, m_respawnTransform.position.y);
         
-        m_dashedNow = false;
         m_dashTimeRemaining = 0.0f;
         m_dashCooldownTimeLeft = 0.0f;
 
@@ -67,6 +65,7 @@ public class MovementManager : MonoBehaviour
     
     public void Awake()
     {
+        m_animator = GetComponent<Animator>();
         m_voidKillTransform = GameObject.Find("KillVoid").GetComponent<Transform>();
         m_dashBGTransform = GameObject.Find("DashSlider").GetComponent<Transform>();
         m_followPlayer = GameObject.Find("FollowPlayer").GetComponent<Transform>();
@@ -74,6 +73,7 @@ public class MovementManager : MonoBehaviour
         m_cameraTransform = Camera.main.transform;
         
         m_rigidbody = GetComponent<Rigidbody2D>();
+        
     }
 
     public void Start()
@@ -183,14 +183,14 @@ public class MovementManager : MonoBehaviour
             return Physics2D.Raycast(
                 new Vector2(transform.position.x + errorX, transform.position.y - transform.localScale.y / 2),
                 Vector2.down,
-                0.2373794f,
+                1f,
                 groundLayer
             );
         };
 
         // boolean init
-        bool onGround = raycast4OnGround(transform.localScale.x / 2 - 0.15f) ||
-                        raycast4OnGround(transform.localScale.x / -2 + 0.15f);
+        bool onGround = raycast4OnGround(transform.localScale.x / 2 + 0.13f) ||
+                        raycast4OnGround(transform.localScale.x / -2 - 0.2f);
         
         bool canJump = onGround || m_coyoteTime > 0f;
         
@@ -199,7 +199,6 @@ public class MovementManager : MonoBehaviour
         if (onGround)
         {
             m_coyoteTime = coyoteTime;
-            m_dashedNow = false;
             m_wallJumpsUsed = 0;
             m_airJumpedThisAirtime = false;
         }
@@ -207,15 +206,19 @@ public class MovementManager : MonoBehaviour
         if (checkAllKeys(jumpKeys, StateType.DOWN))
         {
             if (canJump)
+            {
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 2);
+                m_animator.SetInteger("jumpType", 1);
+            }
             // Walljumping
             else if (Physics2D.Raycast(
                          new Vector2(transform.position.x + transform.localScale.x / 2, transform.position.y),
                          Vector2.right,
-                         0.2373794f,
+                         1f,
                          groundLayer
                      ) && m_wallJumpsUsed < wallJumps)
             {
+                m_animator.SetInteger("jumpType", 2);   
                 m_lastWallJumpDirection = Direction.LEFT;
                 m_wallJumpAfterTime = dashDuration;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.2f);
@@ -225,10 +228,11 @@ public class MovementManager : MonoBehaviour
             else if (Physics2D.Raycast(
                          new Vector2(transform.position.x - transform.localScale.x / 2, transform.position.y),
                          Vector2.left,
-                         0.2373794f,
+                         1f,
                          groundLayer
                      )&& m_wallJumpsUsed < wallJumps)
             {
+                m_animator.SetInteger("jumpType", 2);
                 m_lastWallJumpDirection = Direction.RIGHT;   
                 m_wallJumpAfterTime = dashDuration;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.2f);
@@ -238,21 +242,17 @@ public class MovementManager : MonoBehaviour
             // airjumping
             else if (!m_airJumpedThisAirtime)
             {
+                m_animator.SetInteger("jumpType", 1);    
+                print("AIR jump");
                 m_airJumpedThisAirtime = true;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.5f);
-
-                if (checkAllKeys(dashKeys, StateType.PRESSING) && m_dashedNow)
-                {
-                    canDash = false;
-
-                    m_dashedNow = false;
-                    m_dashTimeRemaining = dashDuration;
-                    m_dashCooldownTimeLeft = dashCooldown;
-
-                }
             }
         }
-            
+
+        if (onGround)
+        {
+            m_animator.SetInteger("jumpType", 0);
+        }
 
         // Dashing
         Action<float> dashLogic = x => {
@@ -269,14 +269,16 @@ public class MovementManager : MonoBehaviour
         
         if (m_dashTimeRemaining > 0f)
         {
+            m_animator.SetBool("isDashing", true);
+            
             dashLogic(dashPower * 20 * (float)m_lastDirection);
             return;
         }
+        
+        m_animator.SetBool("isDashing", false);
 
         if (checkAllKeys(dashKeys, StateType.DOWN) && canDash)
         {
-            m_dashedNow = true;
-            
             m_dashTimeRemaining = dashDuration;
             m_dashCooldownTimeLeft = dashCooldown;
         }
@@ -285,13 +287,24 @@ public class MovementManager : MonoBehaviour
         float horizontalInput = 0f;
         if (checkAllKeys(leftKeys, StateType.PRESSING))
         {
+            print("walking");
+            m_animator.SetBool("isWalking", true);
+            
             m_lastDirection = Direction.LEFT;
             horizontalInput = canJump ? -1f : -0.9f;
         }
         else if (checkAllKeys(rightKeys, StateType.PRESSING))
         {
+            print("walking");
+            m_animator.SetBool("isWalking", true);
+            
             m_lastDirection = Direction.RIGHT;
             horizontalInput = canJump ? 1f : 0.9f;
+        }
+        else
+        {
+            print("!walking");
+            m_animator.SetBool("isWalking", false);
         }
         
         m_rigidbody.velocity = new Vector2(horizontalInput * speed * 15f, m_rigidbody.velocity.y);
@@ -326,5 +339,11 @@ public class MovementManager : MonoBehaviour
         rightKeys = INIArrayToKeys(keystrokes.loadArray("right_keys"));
         reloadINIKeys = INIArrayToKeys(keystrokes.loadArray("reload_ini_keys"));
         resetKeys = INIArrayToKeys(keystrokes.loadArray("reset_keys"));
+        GetComponent<InventoryOpenManager>().invOpenKeys =
+            INIArrayToKeys(keystrokes.loadArray("open_inventory"));
+        GetComponent<InventoryOpenManager>().dropKeys =
+            INIArrayToKeys(keystrokes.loadArray("drop"));
+        GetComponent<InventoryOpenManager>().useKeys =
+            INIArrayToKeys(keystrokes.loadArray("use"));
     }
 }

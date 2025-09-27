@@ -44,7 +44,7 @@ public class InventoryManager : MonoBehaviour
             throw new IndexOutOfRangeException();
         
         m_items.Add(item);
-        item.onCollect(m_playerTransform.position, GameObject.Find("Player"));
+        item.onCollect(m_playerTransform.position);
     }
 
     public bool dropItem(int index)
@@ -54,7 +54,7 @@ public class InventoryManager : MonoBehaviour
         
         m_items.RemoveAt(index);
         
-        m_items[index].onDrop(m_playerTransform.position, GameObject.Find("Player"));
+        m_items[index].onDrop(m_playerTransform.position);
         return true;
     }
     
@@ -66,7 +66,7 @@ public class InventoryManager : MonoBehaviour
         if (m_items[index] is ArmourItem armour)
             equipArmour(armour);
         
-        return m_items[index].onUse(m_playerTransform.position, GameObject.Find("Player"));
+        return m_items[index].onUse(m_playerTransform.position);
     }
 
     private void equipArmour(ArmourItem armour)
@@ -74,5 +74,17 @@ public class InventoryManager : MonoBehaviour
         m_items.Add(m_equipedArmour);
         
         m_equipedArmour = armour;
+    }
+
+    private void Start()
+    {
+        foreach (Item curItem in m_items)
+            curItem.onStart();
+    }
+
+    public void Update()
+    {
+        foreach (Item curItem in m_items)
+            curItem.onFrame();
     }
 }

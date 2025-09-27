@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class ShieldItem : Item
+class ShieldItem : Item
 {
     private float m_useTimeRemaining;
     private bool m_inUse;
@@ -11,14 +11,26 @@ public class ShieldItem : Item
     
     private static readonly float s_timeOn = 4f;
 
-    private void Awake()
+    public override string getName()
     {
-        m_shieldEmptyTransform = transform.Find("ShieldEmpty");
+        return "Shield";
+    }
+    
+    public ShieldItem(){ }
+
+    private void onStart()
+    {
+        m_shieldEmptyTransform = GameObject.Find("ShieldEmpty").GetComponent<Transform>();
     }
 
-    public UseResult onUse(Vector2 pos, GameObject player)
+    public override Item getCopy()
     {
-        m_movementManager = player.GetComponent<MovementManager>();
+        return new ShieldItem();
+    }
+
+    public UseResult onUse(Vector2 pos)
+    {
+        m_movementManager = GameObject.Find("Player").GetComponent<MovementManager>();
         
         m_shieldObject = new GameObject();
         m_shieldObject.AddComponent<Transform>();
@@ -40,16 +52,26 @@ public class ShieldItem : Item
         return UseResult.SUCCESS;
     }
 
-    private void Update()
+    private void onFrame()
     {
+        if (!m_inUse)
+            return;
+        
         m_useTimeRemaining -= Time.deltaTime;
 
-        if (m_useTimeRemaining <= 0 && m_inUse)
+        if (m_useTimeRemaining <= 0)
         {
+            UnityEngine.Object.Destroy(m_shieldObject);
             m_inUse = false;
             return;
         }
         
+        m_shieldObject.transform.position = new Vector2(
+            m_shieldEmptyTransform.position.x + 0.96f  * (float)m_movementManager.getLastDirection(),
+            m_shieldEmptyTransform.position.y + 0.39f * (float)m_movementManager.getLastDirection()
+        );
         
+        if (m_movementManager.getLastDirection() == MovementManager.Direction.LEFT)
+            m_shieldObject.GetComponent<SpriteRenderer>().flipX = true;
     }
 }
