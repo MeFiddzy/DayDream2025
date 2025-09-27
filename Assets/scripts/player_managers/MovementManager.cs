@@ -208,7 +208,6 @@ public class MovementManager : MonoBehaviour
             if (canJump)
             {
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 2);
-                m_animator.SetInteger("jumpType", 1);
             }
             // Walljumping
             else if (Physics2D.Raycast(
@@ -218,7 +217,6 @@ public class MovementManager : MonoBehaviour
                          groundLayer
                      ) && m_wallJumpsUsed < wallJumps)
             {
-                m_animator.SetInteger("jumpType", 2);   
                 m_lastWallJumpDirection = Direction.LEFT;
                 m_wallJumpAfterTime = dashDuration;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.2f);
@@ -232,7 +230,6 @@ public class MovementManager : MonoBehaviour
                          groundLayer
                      )&& m_wallJumpsUsed < wallJumps)
             {
-                m_animator.SetInteger("jumpType", 2);
                 m_lastWallJumpDirection = Direction.RIGHT;   
                 m_wallJumpAfterTime = dashDuration;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.2f);
@@ -242,16 +239,9 @@ public class MovementManager : MonoBehaviour
             // airjumping
             else if (!m_airJumpedThisAirtime)
             {
-                m_animator.SetInteger("jumpType", 1);    
-                print("AIR jump");
                 m_airJumpedThisAirtime = true;
                 m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x, jumpPower * 1.5f);
             }
-        }
-
-        if (onGround)
-        {
-            m_animator.SetInteger("jumpType", 0);
         }
 
         // Dashing
@@ -269,13 +259,11 @@ public class MovementManager : MonoBehaviour
         
         if (m_dashTimeRemaining > 0f)
         {
-            m_animator.SetBool("isDashing", true);
             
             dashLogic(dashPower * 20 * (float)m_lastDirection);
             return;
         }
         
-        m_animator.SetBool("isDashing", false);
 
         if (checkAllKeys(dashKeys, StateType.DOWN) && canDash)
         {
@@ -287,24 +275,15 @@ public class MovementManager : MonoBehaviour
         float horizontalInput = 0f;
         if (checkAllKeys(leftKeys, StateType.PRESSING))
         {
-            print("walking");
-            m_animator.SetBool("isWalking", true);
             
             m_lastDirection = Direction.LEFT;
             horizontalInput = canJump ? -1f : -0.9f;
         }
         else if (checkAllKeys(rightKeys, StateType.PRESSING))
         {
-            print("walking");
-            m_animator.SetBool("isWalking", true);
             
             m_lastDirection = Direction.RIGHT;
             horizontalInput = canJump ? 1f : 0.9f;
-        }
-        else
-        {
-            print("!walking");
-            m_animator.SetBool("isWalking", false);
         }
         
         m_rigidbody.velocity = new Vector2(horizontalInput * speed * 15f, m_rigidbody.velocity.y);
@@ -312,11 +291,14 @@ public class MovementManager : MonoBehaviour
             transform.position.x,
             m_voidKillTransform.position.y
         );
+        m_animator.SetFloat("Speed", Mathf.Abs(m_rigidbody.velocity.x));
+        
+        GetComponent<SpriteRenderer>().flipX = m_rigidbody.velocity.x < 0f;
     }
     
     private void reloadConfig()
     {
-        INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");
+        INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");   
             
         speed = (float)Convert.ToDouble(configFile["_"]["speed"]);
         coyoteTime = (float)Convert.ToDouble(configFile["_"]["coyote_time"]);
@@ -327,9 +309,7 @@ public class MovementManager : MonoBehaviour
             
         dashPower = (float)Convert.ToDouble(configFile["dash"]["dash_power"]);
         dashCooldown = (float)Convert.ToDouble(configFile["dash"]["dash_cooldown"]);
-        dashDuration = (float)Convert.ToDouble(configFile["dash"]["dash_duration"]);
-            
-        print("Reset Stats");
+        dashDuration = (float)Convert.ToDouble(configFile["dash"]["dash_duration"]);    
             
         INIFile keystrokes = INIFile.loadFile(Application.dataPath + "/config/keystrokes.ini");
             
@@ -339,11 +319,5 @@ public class MovementManager : MonoBehaviour
         rightKeys = INIArrayToKeys(keystrokes.loadArray("right_keys"));
         reloadINIKeys = INIArrayToKeys(keystrokes.loadArray("reload_ini_keys"));
         resetKeys = INIArrayToKeys(keystrokes.loadArray("reset_keys"));
-        GetComponent<InventoryOpenManager>().invOpenKeys =
-            INIArrayToKeys(keystrokes.loadArray("open_inventory"));
-        GetComponent<InventoryOpenManager>().dropKeys =
-            INIArrayToKeys(keystrokes.loadArray("drop"));
-        GetComponent<InventoryOpenManager>().useKeys =
-            INIArrayToKeys(keystrokes.loadArray("use"));
     }
 }

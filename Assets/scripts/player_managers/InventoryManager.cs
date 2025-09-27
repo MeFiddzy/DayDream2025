@@ -14,6 +14,7 @@ public class InventoryManager : MonoBehaviour
     public void Awake()
     {
         m_playerTransform = GameObject.Find("Player").GetComponent<Transform>();
+        
     }
 
     public int inventorySlotsCount = 10;
@@ -38,13 +39,13 @@ public class InventoryManager : MonoBehaviour
         m_items[index] = item;
     }
 
-    public void addItem(Item item)
+    public bool addItem(Item item)
     {
         if (getItemCount() + 1 > inventorySlotsCount)
-            throw new IndexOutOfRangeException();
-        
+            return false;
         m_items.Add(item);
         item.onCollect(m_playerTransform.position);
+        return true;
     }
 
     public bool dropItem(int index)
