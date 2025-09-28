@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MovementManager : MonoBehaviour
 {
@@ -140,7 +141,7 @@ public class MovementManager : MonoBehaviour
         
         if (checkAllKeys(resetKeys, StateType.DOWN))
         {
-            kill();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
         }
         
         // Camera follow
