@@ -23,3 +23,5 @@
 # Rider / VSCode / etc.
 .vscode/
 .idea/
+
+UserSettings/EditorUserSettings.asset
