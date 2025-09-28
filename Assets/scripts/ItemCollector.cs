@@ -13,9 +13,9 @@ public class ItemCollector : MonoBehaviour
 
     public void OnTriggerEnter2D(Collider2D other)
     {
-        var mang = GameObject.Find("Player").GetComponent<SimpleInventoryManager>();
+        var mang = other.gameObject.GetComponent<SimpleInventoryManager>();
         
-        if (mang != null&&s_timeFormStart>0.5f)
+        if (mang != null && s_timeFormStart > 0.5f)
         {
             mang.setItem(itemID);
         }

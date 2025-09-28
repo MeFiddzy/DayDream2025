@@ -81,13 +81,13 @@ public class MovementManager : MonoBehaviour
         reloadConfig();
     }
 
-    private enum StateType
+    public enum StateType
     {
         DOWN,
         PRESSING
     }
 
-    private bool checkAllKeys(HashSet<KeyCode> keys, StateType state)
+    public static bool checkAllKeys(HashSet<KeyCode> keys, StateType state)
     {
         foreach (KeyCode key in keys)
         {
@@ -298,9 +298,10 @@ public class MovementManager : MonoBehaviour
     
     private void reloadConfig()
     {
+        return;
         INIFile configFile = INIFile.loadFile(Application.dataPath + "/config/player_stats.ini");   
             
-        speed = (float)Convert.ToDouble(configFile["_"]["speed"]);
+        // speed = (float)Convert.ToDouble(configFile["_"]["speed"]);
         coyoteTime = (float)Convert.ToDouble(configFile["_"]["coyote_time"]);
             
         jumpPower = (float)Convert.ToDouble(configFile["jump"]["jump_power"]);
@@ -319,5 +320,6 @@ public class MovementManager : MonoBehaviour
         rightKeys = INIArrayToKeys(keystrokes.loadArray("right_keys"));
         reloadINIKeys = INIArrayToKeys(keystrokes.loadArray("reload_ini_keys"));
         resetKeys = INIArrayToKeys(keystrokes.loadArray("reset_keys"));
+        AttackManager.attackKeyCodes = INIArrayToKeys(keystrokes.loadArray("attack_keys"));
     }
 }

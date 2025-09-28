@@ -28,12 +28,10 @@ public class SimpleInventoryManager : MonoBehaviour
         if (m_eqItem != null)
         {
             Destroy(m_eqItem);
-            print("not equipped");
         }
         else
         {
             m_equipedItem = (itemID == 1 ? SimpleItem.SWORD : SimpleItem.SHIELD);
-            print("equipped");
         }
 
         
