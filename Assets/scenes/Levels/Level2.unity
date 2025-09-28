@@ -1505,6 +1505,9 @@ MonoBehaviour:
   m_goingDirection: -1
   m_speed: 0.2
   m_edgeCheckDistance: 0.05
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!50 &609927292
 Rigidbody2D:
   serializedVersion: 4
@@ -2043,7 +2046,7 @@ Transform:
   m_GameObject: {fileID: 941122169}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.48, y: 2.19, z: 0}
+  m_LocalPosition: {x: 11.38, y: 2.22, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2064,6 +2067,9 @@ MonoBehaviour:
   m_goingDirection: -1
   m_speed: 0.2
   m_edgeCheckDistance: 0.05
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!50 &941122173
 Rigidbody2D:
   serializedVersion: 4
@@ -2078,8 +2084,8 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_AngularDrag: 0
+  m_GravityScale: 2
   m_Material: {fileID: 6200000, guid: 76bc3e4bf4250fb4f80b1db0d30e7d4c, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
@@ -2090,7 +2096,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &941122174
 BoxCollider2D:
   m_ObjectHideFlags: 0
